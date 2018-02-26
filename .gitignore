@@ -99,3 +99,9 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# JetBrains
+.idea/
+
+# Video files
+.output/
