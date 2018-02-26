@@ -2,7 +2,7 @@ from detection_and_tracking import VehicleDetectionAndTracking
 from moviepy.editor import VideoFileClip
 
 
-input_file_name = 'video1_short.mp4'
+input_file_name = 'videos/video2.mp4'
 output_dir = 'output'
 
 # Confidence Level

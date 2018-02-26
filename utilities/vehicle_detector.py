@@ -1,7 +1,6 @@
 import os
 import numpy as np
 import tensorflow as tf
-import matplotlib.pyplot as plt
 
 from utilities import label_map, visualization
 
@@ -127,7 +126,7 @@ class VehicleDetector:
                     # Convert normalized coordinates to pixel coordinates
                     box = self.normalized_to_pixel_coordinates(boxes[index], dims)
 
-                    # Calculate height, width and ratio to filter out boxes that not the right shape of size
+                    # Calculate height, width and ratio to filter out boxes that not the right shape or size
                     box_h = box[2] - box[0]
                     box_w = box[3] - box[1]
                     ratio = box_h / box_w
