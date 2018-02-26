@@ -1,0 +1,35 @@
+item {
+  name: "/m/01g317"
+  id: 1
+  display_name: "person"
+}
+item {
+  name: "/m/0199g"
+  id: 2
+  display_name: "bicycle"
+}
+item {
+  name: "/m/0k4j"
+  id: 3
+  display_name: "car"
+}
+item {
+  name: "/m/04_sv"
+  id: 4
+  display_name: "motorcycle"
+}
+item {
+  name: "/m/01bjv"
+  id: 5
+  display_name: "bus"
+}
+item {
+  name: "/m/07jdr"
+  id: 6
+  display_name: "train"
+}
+item {
+  name: "/m/07r04"
+  id: 7
+  display_name: "truck"
+}
