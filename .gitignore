@@ -104,4 +104,5 @@ ENV/
 .idea/
 
 # Video files
+.videos/
 .output/
