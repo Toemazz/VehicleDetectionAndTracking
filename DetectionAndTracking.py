@@ -152,10 +152,7 @@ class VehicleDetectionAndTracking:
         # Update list of active trackers
         self.tracker_list = [x for x in self.tracker_list if x.num_unmatched <= self.max_age]
 
-        w = 480.0
-        r = w / image.shape[1]
-        dim = (int(w), int(image.shape[0] * r))
-        return cv2.resize(image, dim)
+        return image
 
     # Method: Used to end VideoFileClip processes
     @staticmethod
@@ -174,9 +171,9 @@ class VehicleDetectionAndTracking:
 
 
 if __name__ == "__main__":
-    vdt = VehicleDetectionAndTracking(min_conf=0.5, max_age=2, max_hits=8)
+    vdt = VehicleDetectionAndTracking(min_conf=0.7, max_age=2, max_hits=8)
     output = 'video1_short_test.mp4'
-    input_vid = VideoFileClip('videos/video1_short.mp4')
+    input_vid = VideoFileClip('videos/video1_part1_short.mp4')
     output_vid = input_vid.fl_image(vdt.pipeline)
     output_vid.write_videofile(output, threads=4, audio=False)
     vdt.close_clip(output_vid)

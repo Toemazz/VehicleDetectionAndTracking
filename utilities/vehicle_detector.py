@@ -2,7 +2,7 @@ import os
 import numpy as np
 import tensorflow as tf
 
-from utilities import label_map, visualization
+from utilities import label_map
 
 
 class VehicleDetector:
@@ -136,7 +136,8 @@ class VehicleDetector:
                         temp_boxes.append(box)
 
                         if self.info:
-                            print('[INFO]: Vehicle Detected at {} with {:.2f}% confidence'.format(box, scores[index]*100.0))
+                            print('[INFO]: Vehicle Detected at {} with {:.2f}% confidence'.format(box,
+                                                                                                  scores[index]*100.0))
 
                 self.bounding_boxes = temp_boxes
 
