@@ -22,7 +22,7 @@ def video_to_frames(video_path, output_path):
 
         if ok:
             # Save frame
-            frame_name = 'frame{}.jpg'.format(frame_num)
+            frame_name = 'frame{}.png'.format(frame_num)
             frame_path = os.path.join(output_path, frame_name)
             cv2.imwrite(frame_path, img)
             frame_num += 1
@@ -43,3 +43,5 @@ def frames_to_video(input_dir, output_path, frame_format='frame', file_type='.jp
     subprocess.call('ffmpeg -y -r {} -i {} -vcodec {} {}'.format(fps, input_image_format, codec, output_path))
 
 
+video_to_frames('C:/PythonProjects/VehicleDetectionAndTracking/videos/video1_short.mp4',
+                'C:/PythonProjects/VehicleDetectionAndTracking/output/')

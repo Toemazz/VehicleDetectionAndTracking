@@ -11,14 +11,16 @@ from utilities.bounding_box import *
 
 
 class VehicleDetectionAndTracking:
-    def __init__(self, min_conf=0.7, max_age=2, max_hits=8, display=False):
+    def __init__(self, min_conf=0.6, max_age=2, max_hits=8, left=False):
         # Initialize constants
         self.frame_count = 0
         self.max_age = max_age                   # no. of consecutive unmatched detection before a track is deleted
         self.min_hits = max_hits                 # no. of consecutive matches needed to establish a track
         self.tracker_list = []
         self.track_id_list = deque(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'])
-        self.display = display
+        self.left = left
+        self.x_distance = 500
+        self.vehicle_detected = False
 
         # Set up 'Vehicle Detector'
         self.detector = VehicleDetector(kitti=False, min_conf=min_conf)
@@ -72,15 +74,10 @@ class VehicleDetectionAndTracking:
     def pipeline(self, image):
         self.frame_count += 1
 
+        dims = image.shape[:2]
+
         # Get bounding boxes for located vehicles
         det_boxes = self.detector.get_bounding_box_locations(image)
-
-        # Add detected bounding boxes to the image
-        if self.display:
-            for i in np.arange(len(det_boxes)):
-                image1 = draw_box_label(image, det_boxes[i], colour=(255, 0, 0))
-                plt.imshow(image1)
-            plt.show()
 
         # Get list of tracker bounding boxes
         trk_boxes = []
@@ -135,6 +132,8 @@ class VehicleDetectionAndTracking:
 
         # Populate the list of trackers to be displayed on the image
         good_tracker_list = []
+        self.vehicle_detected = False
+
         for tracker in self.tracker_list:
             if tracker.num_hits >= self.min_hits and tracker.num_unmatched <= self.max_age:
                 good_tracker_list.append(tracker)
@@ -142,6 +141,19 @@ class VehicleDetectionAndTracking:
 
                 # Draw bounding box on the image
                 image = draw_box_label(image, tracker_bb)
+                center = (int(np.average([tracker_bb[0], tracker_bb[2]])),
+                          int(np.average([tracker_bb[1], tracker_bb[3]])))
+
+                if self.left:
+                    if center[1] <= self.x_distance:
+                        cv2.putText(image, 'WARNING', (20, 50), cv2.FONT_HERSHEY_DUPLEX, 2.0, (255, 0, 0), 2,
+                                    cv2.LINE_AA)
+                        self.vehicle_detected = True
+                else:
+                    if center[1] >= dims[1]-self.x_distance:
+                        cv2.putText(image, 'WARNING', (dims[1]-300, 50), cv2.FONT_HERSHEY_DUPLEX, 2.0, (255, 0, 0), 2,
+                                    cv2.LINE_AA)
+                        self.vehicle_detected = True
 
         # Find list of trackers to be deleted
         deleted_trackers = filter(lambda x: x.num_unmatched > self.max_age, self.tracker_list)
@@ -171,9 +183,9 @@ class VehicleDetectionAndTracking:
 
 
 if __name__ == "__main__":
-    vdt = VehicleDetectionAndTracking(min_conf=0.7, max_age=2, max_hits=8)
-    output = 'video1_short_test.mp4'
-    input_vid = VideoFileClip('videos/video1_part1_short.mp4')
+    vdt = VehicleDetectionAndTracking(left=True)
+    output = 'video1_short_test_text.mp4'
+    input_vid = VideoFileClip('videos/video1_short.mp4')
     output_vid = input_vid.fl_image(vdt.pipeline)
     output_vid.write_videofile(output, threads=4, audio=False)
     vdt.close_clip(output_vid)

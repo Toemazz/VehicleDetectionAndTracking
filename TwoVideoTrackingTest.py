@@ -27,7 +27,7 @@ num_points = 100
 # Add random points to image
 left, l_pts = add_random_points_to_image(dims, num_points, (255, 0, 0))
 right, r_pts = add_random_points_to_image(dims, num_points, (0, 255, 0))
-
+print(l_pts)
 # Find points to be removed
 l_pts_del, r_pts_del = [], []
 for i in range(num_points):
