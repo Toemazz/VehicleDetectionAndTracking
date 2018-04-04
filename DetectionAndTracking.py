@@ -1,7 +1,5 @@
 import sys
 import numpy as np
-import matplotlib.pyplot as plt
-from moviepy.editor import VideoFileClip
 from collections import deque
 from sklearn.utils.linear_assignment_ import linear_assignment
 
@@ -13,13 +11,12 @@ from utilities.bounding_box import *
 class VehicleDetectionAndTracking:
     def __init__(self, min_conf=0.6, max_age=2, max_hits=8, left=False):
         # Initialize constants
-        self.frame_count = 0
         self.max_age = max_age                   # no. of consecutive unmatched detection before a track is deleted
         self.min_hits = max_hits                 # no. of consecutive matches needed to establish a track
         self.tracker_list = []
         self.track_id_list = deque(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'])
         self.left = left
-        self.x_distance = 500
+        self.x_distance = 600
         self.vehicle_detected = False
 
         # Set up 'Vehicle Detector'
@@ -72,8 +69,6 @@ class VehicleDetectionAndTracking:
 
     # Method: Used as a 'pipeline' function for detection and tracking
     def pipeline(self, image):
-        self.frame_count += 1
-
         dims = image.shape[:2]
 
         # Get bounding boxes for located vehicles
@@ -132,7 +127,7 @@ class VehicleDetectionAndTracking:
 
         # Populate the list of trackers to be displayed on the image
         good_tracker_list = []
-        self.vehicle_detected = False
+        warning_count = 0
 
         for tracker in self.tracker_list:
             if tracker.num_hits >= self.min_hits and tracker.num_unmatched <= self.max_age:
@@ -146,14 +141,14 @@ class VehicleDetectionAndTracking:
 
                 if self.left:
                     if center[1] <= self.x_distance:
-                        cv2.putText(image, 'WARNING', (20, 50), cv2.FONT_HERSHEY_DUPLEX, 2.0, (255, 0, 0), 2,
+                        cv2.putText(image, 'WARNING', (20, 50), cv2.FONT_HERSHEY_DUPLEX, 2.0, (0, 0, 255), 2,
                                     cv2.LINE_AA)
-                        self.vehicle_detected = True
+                        warning_count += 1
                 else:
                     if center[1] >= dims[1]-self.x_distance:
-                        cv2.putText(image, 'WARNING', (dims[1]-300, 50), cv2.FONT_HERSHEY_DUPLEX, 2.0, (255, 0, 0), 2,
+                        cv2.putText(image, 'WARNING', (dims[1]-300, 50), cv2.FONT_HERSHEY_DUPLEX, 2.0, (0, 0, 255), 2,
                                     cv2.LINE_AA)
-                        self.vehicle_detected = True
+                        warning_count += 1
 
         # Find list of trackers to be deleted
         deleted_trackers = filter(lambda x: x.num_unmatched > self.max_age, self.tracker_list)
@@ -163,6 +158,9 @@ class VehicleDetectionAndTracking:
 
         # Update list of active trackers
         self.tracker_list = [x for x in self.tracker_list if x.num_unmatched <= self.max_age]
+
+        # True if vehicle was detected in a 'danger zone'
+        self.warning = True if warning_count > 0 else False
 
         return image
 
@@ -180,12 +178,3 @@ class VehicleDetectionAndTracking:
             del clip
         except Exception:
             sys.exc_clear()
-
-
-if __name__ == "__main__":
-    vdt = VehicleDetectionAndTracking(left=True)
-    output = 'video1_short_test_text.mp4'
-    input_vid = VideoFileClip('videos/video1_short.mp4')
-    output_vid = input_vid.fl_image(vdt.pipeline)
-    output_vid.write_videofile(output, threads=4, audio=False)
-    vdt.close_clip(output_vid)
