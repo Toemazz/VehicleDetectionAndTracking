@@ -1,5 +1,5 @@
 import ntpath
-from DetectionAndTracking import VehicleDetectionAndTracking
+from VehicleDetectionAndTracking import VehicleDetectionAndTracking
 from moviepy.editor import VideoFileClip
 
 
