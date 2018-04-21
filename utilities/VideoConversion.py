@@ -21,13 +21,19 @@ def video_to_frames(video_path, output_path):
         ok, img = video.read()
 
         if ok:
-            if 1300 <= count < 1900:
-                # Save frame
-                frame_name = 'frame{}.png'.format(frame_num)
-                frame_path = os.path.join(output_path, frame_name)
-                cv2.imwrite(frame_path, img)
-                frame_num += 1
+            # Save frame
+            frame_name = 'frame{}.png'.format(frame_num)
+            frame_path = os.path.join(output_path, frame_name)
+            cv2.imwrite(frame_path, img)
+            frame_num += 1
             count += 1
+            # if 1200 <= count < 2550:
+            #     # Save frame
+            #     frame_name = 'frame{}.png'.format(frame_num)
+            #     frame_path = os.path.join(output_path, frame_name)
+            #     cv2.imwrite(frame_path, img)
+            #     frame_num += 1
+            # count += 1
 
 
 # Method: used to create a video from a list of frames
@@ -44,8 +50,8 @@ def frames_to_video(input_dir, output_path, frame_format='frame', file_type='.pn
     subprocess.call('ffmpeg -y -r {} -i {} -vcodec {} {}'.format(fps, input_image_format, codec, output_path))
 
 
-# video_to_frames('C:/PythonProjects/VehicleDetectionAndTracking/videos/right_60_01_full.mp4',
-#                 'C:/PythonProjects/VehicleDetectionAndTracking/test/sample02/')
+# video_to_frames('C:/PythonProjects/VehicleDetectionAndTracking/front_left_vlc_2.mp4',
+#                 'C:/PythonProjects/VehicleDetectionAndTracking/output/front_left_2_out/')
 
-frames_to_video('C:/PythonProjects/VehicleDetectionAndTracking/output/',
-                'C:/PythonProjects/VehicleDetectionAndTracking/video1_short_rear.mp4', fps=25)
+frames_to_video('C:/PythonProjects/VehicleDetectionAndTracking/output/front_both_1_out/',
+                'C:/PythonProjects/VehicleDetectionAndTracking/videos/front_both_1_out.mp4', fps=30)

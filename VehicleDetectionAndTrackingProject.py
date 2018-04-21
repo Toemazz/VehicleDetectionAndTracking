@@ -1,7 +1,6 @@
 import sys
 import numpy as np
 from collections import deque
-from moviepy.editor import VideoFileClip
 from sklearn.utils.linear_assignment_ import linear_assignment
 
 from utilities.VehicleDetector import VehicleDetector
@@ -9,13 +8,16 @@ from utilities.VehicleTracker import VehicleTracker
 from utilities.BoundingBox import *
 
 
-class VehicleDetectionAndTracking:
-    def __init__(self, min_conf=0.6, max_age=2, max_hits=8):
+class VehicleDetectionAndTrackingProject:
+    def __init__(self, min_conf=0.6, max_age=4, max_hits=10, front=True, left=False):
         # Initialize constants
         self.max_age = max_age                   # no. of consecutive unmatched detection before a track is deleted
         self.min_hits = max_hits                 # no. of consecutive matches needed to establish a track
         self.tracker_list = []
         self.track_id_list = deque(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'])
+        self.left = left
+        self.front = front
+        self.vehicle_detected = False
         self.count = 0
 
         # Set up 'Vehicle Detector'
@@ -68,6 +70,9 @@ class VehicleDetectionAndTracking:
 
     # Method: Used as a 'pipeline' function for detection and tracking
     def pipeline(self, image):
+        dims = image.shape[:2]
+        self.count += 1
+
         # Get bounding boxes for located vehicles
         det_boxes = self.detector.get_bounding_box_locations(image)
 
@@ -124,6 +129,8 @@ class VehicleDetectionAndTracking:
 
         # Populate the list of trackers to be displayed on the image
         good_tracker_list = []
+        warning_count = 0
+        area_count = 0
 
         for tracker in self.tracker_list:
             if tracker.num_hits >= self.min_hits and tracker.num_unmatched <= self.max_age:
@@ -133,7 +140,30 @@ class VehicleDetectionAndTracking:
                 # Draw bounding box on the image
                 image = draw_box_label(image, tracker_bb)
 
-                self.count += 1
+                if self.front:
+                    center = (int(np.average([tracker_bb[0], tracker_bb[2]])),
+                              int(np.average([tracker_bb[1], tracker_bb[3]])))
+
+                    if self.left:
+                        if center[1] <= dims[1] // 2:
+                            cv2.putText(image, 'WARNING', (20, 50), cv2.FONT_HERSHEY_DUPLEX, 2.0, (0, 0, 255), 2,
+                                        cv2.LINE_AA)
+                            warning_count += 1
+                    else:
+                        if center[1] >= dims[1] // 2:
+                            cv2.putText(image, 'WARNING', (dims[1]-300, 50), cv2.FONT_HERSHEY_DUPLEX, 2.0, (0, 0, 255), 2,
+                                        cv2.LINE_AA)
+                            warning_count += 1
+                else:
+                    h = tracker_bb[2] - tracker_bb[0]
+                    w = tracker_bb[3] - tracker_bb[1]
+                    bb_area = h * w
+                    bb_area_percent = 100 * (bb_area/(dims[0]*dims[1]))
+
+                    if bb_area_percent >= 2:
+                        cv2.putText(image, 'WARNING', (int(dims[1]/2)-120, 50), cv2.FONT_HERSHEY_DUPLEX, 2.0,
+                                    (0, 0, 255), 2, cv2.LINE_AA)
+                        area_count += 1
 
         # Find list of trackers to be deleted
         deleted_trackers = filter(lambda x: x.num_unmatched > self.max_age, self.tracker_list)
@@ -143,6 +173,12 @@ class VehicleDetectionAndTracking:
 
         # Update list of active trackers
         self.tracker_list = [x for x in self.tracker_list if x.num_unmatched <= self.max_age]
+
+        # True if vehicle was detected in a 'danger zone'
+        if self.front:
+            self.warning = True if warning_count > 0 else False
+        else:
+            self.warning = True if area_count > 0 else False
 
         return image
 
@@ -160,13 +196,3 @@ class VehicleDetectionAndTracking:
             del clip
         except Exception:
             sys.exc_clear()
-
-
-vdt = VehicleDetectionAndTracking(min_conf=0.8, max_age=2, max_hits=8)
-output = 'video1_short_out_80.mp4'
-input_vid = VideoFileClip('videos/video1_short.mp4')
-output_vid = input_vid.fl_image(vdt.pipeline)
-output_vid.write_videofile(output, threads=4, audio=False)
-vdt.close_clip(output_vid)
-print(vdt.count)
-

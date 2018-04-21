@@ -2,19 +2,19 @@ import cv2
 import numpy as np
 from tqdm import tqdm
 
-from VehicleDetectionAndTracking import VehicleDetectionAndTracking
+from VehicleDetectionAndTrackingProject import VehicleDetectionAndTrackingProject
 
 # Set up video capture
-left_video = cv2.VideoCapture('videos/video1_short.mp4')
-right_video = cv2.VideoCapture('videos/video1_short.mp4')
+left_video = cv2.VideoCapture('videos/front_left_1.mp4')
+right_video = cv2.VideoCapture('videos/front_right_1.mp4')
 
 # Get information about the videos
 n_frames = min(int(left_video.get(cv2.CAP_PROP_FRAME_COUNT)), int(right_video.get(cv2.CAP_PROP_FRAME_COUNT)))
 fps = int(left_video.get(cv2.CAP_PROP_FPS))
 
 # Create instances for vehicle detection
-left_vdt = VehicleDetectionAndTracking(left=True)
-right_vdt = VehicleDetectionAndTracking(left=False)
+left_vdt = VehicleDetectionAndTrackingProject(left=True)
+right_vdt = VehicleDetectionAndTrackingProject(left=False)
 
 for n in tqdm(range(n_frames)):
     # Grab the frames from their respective video streams
@@ -40,4 +40,4 @@ for n in tqdm(range(n_frames)):
             cv2.putText(out, 'SAFE', (int(dims[1]/2)-40, 25), cv2.FONT_HERSHEY_DUPLEX, 1.0, (0, 255, 0), 2, cv2.LINE_AA)
 
         # Save frame
-        cv2.imwrite('output/frame{}.png'.format(n+1), out)
+        cv2.imwrite('output/front_both_1_out/frame{}.png'.format(n+1), out)
